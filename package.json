@@ -3,12 +3,14 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "react-router build",
+    "build": "NODE_OPTIONS=\"--max-old-space-size=512\" react-router build --no-source-maps",
+    "build:light": "NODE_OPTIONS=\"--max-old-space-size=256\" react-router build --no-source-maps",
     "deploy": "npx @ianlucas/deploy@latest",
-    "dev": "react-router dev",
+    "dev": "NODE_OPTIONS=\"--max-old-space-size=256\" react-router dev",
     "format": "prettier . --write",
-    "start": "react-router-serve ./build/server/index.js",
-    "test": "vitest",
+    "start": "node --max-old-space-size=192 --max-semi-space-size=16 ./build/server/index.js",
+    "start:light": "node --max-old-space-size=128 ./build/server/index.js",
+    "test": "NODE_OPTIONS=\"--max-old-space-size=256\" vitest",
     "translate": "tsx scripts/translate.ts && prettier app/translations/*.ts --write",
     "typecheck": "react-router typegen && tsc",
     "upgrade": "npx npm-check-updates@latest --target minor -u"
