@@ -7,7 +7,7 @@
     "deploy": "npx @ianlucas/deploy@latest",
     "dev": "react-router dev",
     "format": "prettier . --write",
-    "start": "node --max-old-space-size=192 ./build/server/index.js",
+    "start": "react-router-serve ./build/server/index.js",
     "test": "vitest",
     "translate": "tsx scripts/translate.ts && prettier app/translations/*.ts --write",
     "typecheck": "react-router typegen && tsc",
