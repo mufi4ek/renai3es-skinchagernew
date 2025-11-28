@@ -34,6 +34,156 @@ import { ItemImage } from "./item-image";
 import { Modal, ModalHeader } from "./modal";
 import { ModalButton } from "./modal-button";
 
+const styles = `
+.sticker-picker-grid {
+  display: grid;
+  gap: 0.25rem;
+  background: rgba(21, 21, 32, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem;
+  border: 1px solid rgba(42, 42, 58, 0.4);
+}
+
+.sticker-slot {
+  position: relative;
+  aspect-ratio: 256/192;
+  overflow: hidden;
+  border-radius: 6px;
+  background: linear-gradient(145deg, rgba(21, 21, 32, 0.6) 0%, rgba(30, 30, 47, 0.4) 100%);
+  border: 1px solid rgba(42, 42, 58, 0.6);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sticker-slot:hover:not(:disabled) {
+  border-color: rgba(58, 134, 255, 0.4);
+  box-shadow: 0 0 12px rgba(58, 134, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.sticker-slot-button {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  cursor: default;
+  overflow: hidden;
+  background: rgba(10, 10, 15, 0.3);
+}
+
+.sticker-slot-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b6b8a;
+  font-size: 0.875rem;
+}
+
+.sticker-wear-text {
+  position: absolute;
+  right: 0.25rem;
+  bottom: 0.125rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #e2e2f0;
+  text-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.8),
+    0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+.sticker-edit-button {
+  position: absolute;
+  bottom: 0.25rem;
+  left: 0.25rem;
+  background: rgba(42, 42, 58, 0.8);
+  border: 1px solid rgba(42, 42, 58, 0.8);
+  border-radius: 4px;
+  color: #a0a0c0;
+  padding: 0.25rem;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.sticker-edit-button:hover {
+  background: rgba(58, 134, 255, 0.3);
+  border-color: rgba(58, 134, 255, 0.5);
+  color: #3a86ff;
+  transform: scale(1.05);
+}
+
+.sticker-picker-modal {
+  background: linear-gradient(145deg, #151520 0%, #1e1e2f 100%);
+  border: 1px solid #2a2a3a;
+  border-radius: 12px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+}
+
+.sticker-picker-modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #3a86ff, transparent);
+}
+
+.sticker-picker-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.5rem 0.5rem 0 0.5rem;
+  padding: 0.75rem;
+  background: rgba(26, 26, 38, 0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(42, 42, 58, 0.4);
+}
+
+@media (min-width: 1024px) {
+  .sticker-picker-controls {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.sticker-picker-search {
+  flex: 1;
+}
+
+.sticker-picker-select {
+  width: 10.5rem;
+}
+
+.sticker-picker-delete-button {
+  background: linear-gradient(145deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  transition: all 0.3s ease;
+}
+
+.sticker-picker-delete-button:hover {
+  background: linear-gradient(145deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.2) 100%);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #f87171;
+  transform: scale(1.05);
+}
+
+.sticker-confirm-modal {
+  background: linear-gradient(145deg, #151520 0%, #1e1e2f 100%);
+  border: 1px solid #2a2a3a;
+  border-radius: 12px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+}
+
+.sticker-confirm-modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #3a86ff, transparent);
+}
+`;
+
 export function StickerPicker({
   disabled,
   forItem,
@@ -160,8 +310,9 @@ export function StickerPicker({
 
   return (
     <>
+      <style>{styles}</style>
       <div
-        className="grid gap-1"
+        className="sticker-picker-grid"
         style={{
           gridTemplateColumns: `repeat(${CS2_MAX_STICKERS}, minmax(0, 1fr))`
         }}
@@ -172,43 +323,44 @@ export function StickerPicker({
           const item =
             sticker !== undefined ? CS2Economy.getById(sticker.id) : undefined;
           return (
-            <div className="relative aspect-256/192" key={index}>
+            <div className="sticker-slot" key={index}>
               <button
                 disabled={disabled}
-                className="absolute h-full w-full cursor-default overflow-hidden bg-neutral-950/40"
+                className="sticker-slot-button"
                 onClick={handleClickSlot(index)}
               >
                 {item !== undefined ? (
                   <ItemImage item={item} />
                 ) : (
-                  <div className="flex items-center justify-center text-neutral-700">
+                  <div className="sticker-slot-empty">
                     {translate("StickerPickerNA")}
                   </div>
                 )}
                 {sticker !== undefined && (
-                  <div className="text-outline-1 absolute right-1 bottom-0 text-sm font-bold drop-shadow-lg">
+                  <div className="sticker-wear-text">
                     {(stickerWear * 100).toFixed(0)}%
                   </div>
                 )}
                 {!disabled && (
-                  <div className="absolute top-0 left-0 h-full w-full border-2 border-transparent hover:border-blue-500/50" />
+                  <div className="absolute top-0 left-0 h-full w-full border-2 border-transparent hover:border-blue-500/30" />
                 )}
               </button>
               {item !== undefined && !disabled && (
-                <ButtonWithTooltip
-                  onClick={handleClickEditSlot(index)}
-                  className="absolute bottom-1 left-1 hover:bg-blue-500/50"
-                  tooltip={translate("EditorStickerEdit")}
-                >
-                  <FontAwesomeIcon icon={faPen} className="h-3" />
-                </ButtonWithTooltip>
+                <div className="sticker-edit-button">
+                  <ButtonWithTooltip
+                    onClick={handleClickEditSlot(index)}
+                    tooltip={translate("EditorStickerEdit")}
+                  >
+                    <FontAwesomeIcon icon={faPen} className="h-3" />
+                  </ButtonWithTooltip>
+                </div>
               )}
             </div>
           );
         })}
       </div>
       <Modal
-        className="w-[540px] pb-1"
+        className="sticker-picker-modal w-[540px] pb-1"
         hidden={activeIndex === undefined || isEditing}
         blur
       >
@@ -216,32 +368,34 @@ export function StickerPicker({
           title={translate("StickerPickerHeader")}
           onClose={handleCloseModal}
         />
-        <div className="my-2 flex flex-col gap-2 px-2 lg:flex-row lg:items-center">
+        <div className="sticker-picker-controls">
           <IconInput
             icon={faMagnifyingGlass}
-            labelStyles="flex-1"
+            labelStyles="sticker-picker-search"
             onChange={setSearch}
             placeholder={translate("StickerPickerSearchPlaceholder")}
             value={search}
           />
           <IconSelect
             icon={faTag}
-            className="w-[168px]"
+            className="sticker-picker-select"
             onChange={setCategory}
             options={categories}
             placeholder={translate("StickerPickerFilterPlaceholder")}
             value={category}
           />
-          <IconButton
-            icon={faTrashCan}
-            onClick={handleRemoveSticker}
-            title={translate("StickerPickerRemove")}
-          />
+          <div className="sticker-picker-delete-button">
+            <IconButton
+              icon={faTrashCan}
+              onClick={handleRemoveSticker}
+              title={translate("StickerPickerRemove")}
+            />
+          </div>
         </div>
         <ItemBrowser items={filtered} onClick={handleSelectSticker} />
       </Modal>
       {selected !== undefined && (
-        <Modal className="w-[420px]">
+        <Modal className="sticker-confirm-modal w-[420px]">
           <ModalHeader
             title={translate("EditorConfirmPick")}
             onClose={handleCloseSelectModal}
@@ -257,7 +411,7 @@ export function StickerPicker({
               value={appliedStickerData}
             />
           )}
-          <div className="my-6 flex justify-center gap-2">
+          <div className="my-6 flex justify-center gap-3 px-4">
             <ModalButton
               children={translate("EditorCancel")}
               onClick={handleCloseSelectModal}

@@ -15,6 +15,30 @@ import { ClientOnly } from "remix-utils/client-only";
 import { useWatch } from "~/components/hooks/use-watch";
 import { TransformedInventoryItems } from "~/utils/inventory-transform";
 
+const styles = `
+.item-selector-overlay {
+  background: linear-gradient(135deg, rgba(10, 10, 15, 0.98) 0%, rgba(15, 15, 25, 0.95) 100%);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(42, 42, 58, 0.8);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.item-selector-content {
+  background: linear-gradient(145deg, rgba(21, 21, 32, 0.9) 0%, rgba(30, 30, 47, 0.8) 100%);
+  border: 1px solid rgba(42, 42, 58, 0.6);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.item-selector-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.item-selector-scroll {
+  scroll-behavior: smooth;
+}
+`;
+
 export interface ItemSelectorContextProps {
   items: TransformedInventoryItems;
   readOnly?: boolean;
@@ -63,17 +87,20 @@ export function ItemSelectorProvider({ children }: { children: ReactNode }) {
   useItemSelectorScrollTopHandler(itemSelector);
 
   return (
-    <ClientOnly
-      children={() => (
-        <ItemSelectorContext.Provider
-          value={{
-            itemSelector,
-            setItemSelector
-          }}
-        >
-          {children}
-        </ItemSelectorContext.Provider>
-      )}
-    />
+    <>
+      <style>{styles}</style>
+      <ClientOnly
+        children={() => (
+          <ItemSelectorContext.Provider
+            value={{
+              itemSelector,
+              setItemSelector
+            }}
+          >
+            {children}
+          </ItemSelectorContext.Provider>
+        )}
+      />
+    </>
   );
 }

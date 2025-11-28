@@ -26,6 +26,108 @@ import { ItemBrowser } from "./item-browser";
 import { ItemImage } from "./item-image";
 import { Modal, ModalHeader } from "./modal";
 
+const styles = `
+.patch-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.25rem;
+}
+
+.patch-slot {
+  position: relative;
+  aspect-ratio: 256/192;
+  cursor: pointer;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(21, 21, 32, 0.8) 0%, rgba(30, 30, 47, 0.6) 100%);
+  border: 1px solid rgba(42, 42, 58, 0.6);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.patch-slot:hover {
+  background: linear-gradient(145deg, rgba(30, 30, 47, 0.8) 0%, rgba(42, 42, 58, 0.6) 100%);
+  border-color: rgba(58, 134, 255, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.patch-slot:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.patch-slot:disabled:hover {
+  transform: none;
+  border-color: rgba(42, 42, 58, 0.6);
+}
+
+.patch-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c6c8a;
+  font-size: 0.875rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.patch-hover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.patch-slot:hover .patch-hover-overlay {
+  border-color: rgba(58, 134, 255, 0.5);
+  box-shadow: inset 0 0 20px rgba(58, 134, 255, 0.1);
+}
+
+.patch-picker-modal {
+  width: 540px;
+  padding-bottom: 0.25rem;
+}
+
+.patch-picker-controls {
+  margin: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .patch-picker-controls {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.patch-search-input {
+  flex: 1;
+}
+
+.patch-remove-button {
+  background: linear-gradient(145deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.15) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  transition: all 0.3s ease;
+}
+
+.patch-remove-button:hover {
+  background: linear-gradient(145deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.25) 100%);
+  border-color: rgba(239, 68, 68, 0.6);
+  transform: scale(1.05);
+}
+
+.patch-remove-button:active {
+  transform: scale(0.95);
+}
+`;
+
 export function PatchPicker({
   disabled,
   onChange,
@@ -89,7 +191,8 @@ export function PatchPicker({
 
   return (
     <>
-      <div className="grid grid-cols-5 gap-1">
+      <style>{styles}</style>
+      <div className="patch-picker-grid">
         {range(CS2_MAX_PATCHES).map((index) => {
           const patchId = value[index];
           const item =
@@ -98,32 +201,31 @@ export function PatchPicker({
             <button
               disabled={disabled}
               key={index}
-              className="relative aspect-256/192 cursor-default overflow-hidden bg-neutral-950/40"
+              className="patch-slot"
               onClick={handleClickSlot(index)}
             >
               {item !== undefined ? (
                 <ItemImage item={item} />
               ) : (
-                <div className="flex items-center justify-center text-neutral-700">
+                <div className="patch-empty">
                   {translate("StickerPickerNA")}
                 </div>
               )}
               {!disabled && (
-                <div className="absolute top-0 left-0 h-full w-full border-2 border-transparent hover:border-blue-500/50" />
+                <div className="patch-hover-overlay" />
               )}
             </button>
           );
         })}
       </div>
-      <Modal className="w-[540px] pb-1" hidden={activeIndex === undefined} blur>
+      <Modal className="patch-picker-modal" hidden={activeIndex === undefined} blur>
         <ModalHeader
           title={translate("PatchPickerHeader")}
           onClose={handleCloseModal}
         />
-        <div className="my-2 flex flex-col gap-2 px-2 lg:flex-row lg:items-center">
+        <div className="patch-picker-controls">
           <IconInput
             icon={faMagnifyingGlass}
-            labelStyles="flex-1"
             onChange={setSearch}
             placeholder={translate("PatchPickerSearchPlaceholder")}
             value={search}

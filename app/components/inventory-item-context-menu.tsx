@@ -27,12 +27,17 @@ export function InventoryItemContextButton({
     triggerClicked();
   }
 
+  if (!condition) {
+    return null;
+  }
+
   return (
-    condition && (
-      <ContextButton onClick={handleClick}>
-        {clickLabel !== undefined && clicked ? clickLabel : label}
-      </ContextButton>
-    )
+    <ContextButton
+      onClick={handleClick}
+      className={clickLabel !== undefined && clicked ? "success" : ""}
+    >
+      {clickLabel !== undefined && clicked ? clickLabel : label}
+    </ContextButton>
   );
 }
 

@@ -19,6 +19,60 @@ import { FillSpinner } from "./fill-spinner";
 import { Modal, ModalHeader } from "./modal";
 import { ModalButton } from "./modal-button";
 
+const styles = `
+.sync-indicator-container {
+  pointer-events: none;
+  position: fixed;
+  right: 2rem;
+  bottom: 2rem;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+}
+
+.sync-indicator-spinner {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+}
+
+.sync-error-modal {
+  background: linear-gradient(145deg, #151520 0%, #1e1e2f 100%);
+  border: 1px solid #2a2a3a;
+  border-radius: 12px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+}
+
+.sync-error-modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #3a86ff, transparent);
+}
+
+.sync-error-text {
+  color: #e2e2f0;
+  margin-top: 0.5rem;
+  padding: 0 1rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.sync-error-button {
+  min-width: 120px;
+}
+
+.sync-error-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.sync-error-spinner {
+  display: inline-block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+`;
+
 export function SyncIndicator() {
   const translate = useTranslate();
   const { inventoryMaxItems, inventoryStorageUnitMaxItems } = useRules();
@@ -68,31 +122,34 @@ export function SyncIndicator() {
       children={() =>
         createPortal(
           <>
+            <style>{styles}</style>
             <div
-              className="pointer-events-none fixed right-8 bottom-8 transition-all"
+              className="sync-indicator-container"
               style={{ opacity }}
             >
-              <FillSpinner />
+              <FillSpinner className="sync-indicator-spinner" />
             </div>
             {showSyncErrorModal && (
-              <Modal fixed>
+              <Modal className="sync-error-modal" fixed>
                 <ModalHeader title={translate("SyncErrorTitle")} />
-                <p className="mt-2 px-4">{translate("SyncErrorDesc")}</p>
+                <p className="sync-error-text">{translate("SyncErrorDesc")}</p>
                 <div className="my-6 mt-4 flex justify-center px-4">
-                  <ModalButton
-                    disabled={disableContinueButton}
-                    onClick={handleClose}
-                    variant="primary"
-                    children={
-                      disableContinueButton ? (
-                        <span className="inline-block">
-                          <FillSpinner />
-                        </span>
-                      ) : (
-                        translate("SyncErrorContinue")
-                      )
-                    }
-                  />
+                  <div className="sync-error-button">
+                    <ModalButton
+                      disabled={disableContinueButton}
+                      onClick={handleClose}
+                      variant="primary"
+                      children={
+                        disableContinueButton ? (
+                          <span className="sync-error-spinner">
+                            <FillSpinner />
+                          </span>
+                        ) : (
+                          translate("SyncErrorContinue")
+                        )
+                      }
+                    />
+                  </div>
                 </div>
               </Modal>
             )}

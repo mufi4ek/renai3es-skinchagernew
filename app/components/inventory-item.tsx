@@ -32,6 +32,71 @@ import { InventoryItemTile } from "./inventory-item-tile";
 import { InventoryItemTooltip } from "./inventory-item-tooltip";
 import { alert, confirm } from "./modal-generic";
 
+const styles = `
+.inventory-item-container {
+  position: relative;
+  width: 154px;
+  transition: all 0.2s ease;
+}
+
+.inventory-item-container:hover {
+  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.9));
+}
+
+.context-menu {
+  z-index: 160;
+  width: 192px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(21, 21, 32, 0.95) 0%, rgba(30, 30, 47, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(42, 42, 58, 0.8);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(58, 134, 255, 0.1);
+  padding: 0.5rem 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.875rem;
+  color: #e2e2f0;
+  outline: none;
+}
+
+.context-menu::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #3a86ff, transparent);
+  border-radius: 8px 8px 0 0;
+}
+
+.tooltip {
+  background: linear-gradient(145deg, rgba(21, 21, 32, 0.95) 0%, rgba(30, 30, 47, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(42, 42, 58, 0.8);
+  border-radius: 6px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(58, 134, 255, 0.1);
+  color: #e2e2f0;
+  padding: 0.75rem;
+  max-width: 320px;
+  z-index: 140;
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #3a86ff, transparent);
+  border-radius: 6px 6px 0 0;
+}
+`;
+
 export function InventoryItem({
   disableContextMenu,
   disableHover,
@@ -188,10 +253,11 @@ export function InventoryItem({
 
   return (
     <>
+      <style>{styles}</style>
       <div
         className={clsx(
-          "relative w-[154px] transition-all",
-          onClick === undefined && "hover:drop-shadow-[0_0_5px_rgba(0,0,0,1)]"
+          "inventory-item-container",
+          onClick === undefined && "cursor-pointer"
         )}
         ref={ref}
         {...getHoverReferenceProps(getClickReferenceProps())}
@@ -208,7 +274,7 @@ export function InventoryItem({
         <FloatingFocusManager context={clickContext} modal={false}>
           <div
             role="menu"
-            className="font-display z-20 w-[192px] rounded-sm bg-neutral-800 py-2 text-sm text-white outline-hidden"
+            className="context-menu"
             ref={clickRefs.setFloating}
             style={clickStyles}
             {...getClickFloatingProps()}

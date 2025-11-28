@@ -22,6 +22,85 @@ import { InventoryItemTooltipStatTrak } from "./inventory-item-tooltip-stattrak"
 import { InventoryItemTooltipTeams } from "./inventory-item-tooltip-teams";
 import { InventoryItemTooltipWear } from "./inventory-item-wear";
 
+const styles = `
+.tooltip-container {
+  background: linear-gradient(145deg, rgba(21, 21, 32, 0.95) 0%, rgba(30, 30, 47, 0.95) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(42, 42, 58, 0.8);
+  border-radius: 10px;
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(58, 134, 255, 0.12);
+  color: #e2e2f0;
+  padding: 1rem;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  overflow: hidden;
+  z-index: 180;
+}
+
+.tooltip-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  padding: 1px;
+  background: linear-gradient(120deg, rgba(58, 134, 255, 0.4), transparent 40%, rgba(212, 175, 55, 0.25));
+  -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.tooltip-container-wide {
+  width: 396px;
+}
+
+.tooltip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(58, 134, 255, 0.15);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.tournament-desc {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #a0a0c0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.base-description,
+.item-description {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #dcdcf0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
+  white-space: pre-wrap;
+}
+
+.item-description-italic {
+  font-style: italic;
+  color: #c5d3ff;
+}
+
+.stats-section {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(58, 134, 255, 0.15);
+  display: grid;
+  gap: 0.5rem;
+}
+`;
+
 export function InventoryItemTooltip({
   item,
   forwardRef,
@@ -54,57 +133,54 @@ export function InventoryItemTooltip({
   const itemDescription = item.parent !== undefined ? item.desc : undefined;
 
   return (
-    <div
-      role="tooltip"
-      className={clsx(
-        "z-20 max-w-[396px] rounded-sm bg-neutral-900/95 px-6 py-4 text-xs text-white outline-hidden",
-        !isContainer && "lg:w-[396px]"
-      )}
-      ref={forwardRef}
-      {...props}
-    >
-      <InventoryItemTooltipName item={item} />
-      <div className="mt-2.5 grid [grid-template-columns:auto_1fr] items-center gap-1 border-t border-b border-neutral-700/70 p-2">
-        <InventoryItemTooltipRarity item={item} />
-        {hasWear && <InventoryItemTooltipExterior wear={wear} />}
-        {hasTeams && <InventoryItemTooltipTeams teams={teams} />}
-      </div>
-      {has(item.tournamentDesc) && (
-        <p className="mt-4 text-yellow-300">{item.tournamentDesc}</p>
-      )}
-      {hasStatTrak && (
-        <InventoryItemTooltipStatTrak
-          type={item.type}
-          statTrak={item.statTrak}
-        />
-      )}
-      {has(baseDescription) && (
-        <p className="mt-4 whitespace-pre-wrap text-neutral-300">
-          {baseDescription}
-        </p>
-      )}
-      {has(itemDescription) && (
-        <p
-          className={clsx(
-            "mt-4 whitespace-pre-wrap text-neutral-300",
-            item.isPaintable() && "italic"
-          )}
-        >
-          {itemDescription}
-        </p>
-      )}
-      {hasContents && (
-        <InventoryItemTooltipContents
-          containerItem={containerItem}
-          unlockedItem={!isContainer ? item : undefined}
-        />
-      )}
-      {statsForNerds && hasAttributes && (
-        <div className="mt-2 flex flex-col gap-2">
-          {hasWear && <InventoryItemTooltipWear wear={wear} />}
-          {hasSeed && <InventoryItemTooltipSeed seed={item.seed} />}
+    <>
+      <style>{styles}</style>
+      <div
+        role="tooltip"
+        className={clsx(
+          "tooltip-container",
+          !isContainer && "tooltip-container-wide"
+        )}
+        ref={forwardRef}
+        {...props}
+      >
+        <InventoryItemTooltipName item={item} />
+        <div className="tooltip-grid">
+          <InventoryItemTooltipRarity item={item} />
+          {hasWear && <InventoryItemTooltipExterior wear={wear} />}
+          {hasTeams && <InventoryItemTooltipTeams teams={teams} />}
         </div>
-      )}
-    </div>
+        {has(item.tournamentDesc) && (
+          <p className="tournament-desc">{item.tournamentDesc}</p>
+        )}
+        {hasStatTrak && (
+          <InventoryItemTooltipStatTrak
+            type={item.type}
+            statTrak={item.statTrak}
+          />
+        )}
+        {has(baseDescription) && (
+          <p className="base-description">
+            {baseDescription}
+          </p>
+        )}
+        {has(itemDescription) && (
+          <p
+            className={clsx(
+              "item-description",
+              item.isPaintable() && "item-description-italic"
+            )}
+          >
+            {itemDescription}
+          </p>
+        )}
+        {statsForNerds && hasAttributes && (
+          <div className="stats-section">
+            {hasWear && <InventoryItemTooltipWear wear={wear} />}
+            {hasSeed && <InventoryItemTooltipSeed seed={item.seed} />}
+          </div>
+        )}
+      </div>
+    </>
   );
 }

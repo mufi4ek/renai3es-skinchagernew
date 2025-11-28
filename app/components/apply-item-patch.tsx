@@ -17,14 +17,13 @@ import { playSound } from "~/utils/sound";
 import { useInventory, useTranslate } from "./app-context";
 import { ItemImage } from "./item-image";
 import { ModalButton } from "./modal-button";
-import { Overlay } from "./overlay";
 import { UseItemFooter } from "./use-item-footer";
 import { UseItemHeader } from "./use-item-header";
 
 export function ApplyItemPatch({
   onClose,
   targetUid,
-  patchUid: patchUid
+  patchUid
 }: {
   onClose: () => void;
   targetUid: number;
@@ -57,60 +56,76 @@ export function ApplyItemPatch({
     <ClientOnly
       children={() =>
         createPortal(
-          <Overlay>
-            <UseItemHeader
-              actionDesc={translate("ApplyStickerUseOn")}
-              actionItem={nameItemString(targetItem)}
-              title={translate("ApplyPatchUse")}
-              warning={translate("ApplyPatchWarn")}
-            />
-            <ItemImage className="m-auto max-w-[512px]" item={targetItem} />
-            <div className="flex items-center justify-center">
-              {targetItem.allPatches().map(([xslot, patchId]) =>
-                patchId !== undefined || xslot === slot ? (
-                  <ItemImage
-                    key={xslot}
-                    className="w-[168px]"
-                    item={
-                      patchId !== undefined
-                        ? CS2Economy.getById(patchId)
-                        : stickerItem
-                    }
-                  />
-                ) : (
-                  <button
-                    key={xslot}
-                    className="group flex h-[126px] w-[168px] items-center justify-center"
-                    onClick={() => {
-                      setSlot(xslot);
-                      playSound("buttonclick");
-                    }}
-                  >
-                    <div className="rounded-md border-2 border-white/20 p-4 px-6 transition group-hover:border-white/80">
-                      <FontAwesomeIcon className="h-4" icon={faPlus} />
-                    </div>
-                  </button>
-                )
-              )}
+          <div className="apply-patch-overlay">
+            <div className="apply-patch-container">
+              <div className="apply-patch-header">
+                <UseItemHeader
+                  actionDesc={translate("ApplyStickerUseOn")}
+                  actionItem={nameItemString(targetItem)}
+                  title={translate("ApplyPatchUse")}
+                  warning={translate("ApplyPatchWarn")}
+                />
+              </div>
+              <div className="apply-patch-content">
+                <div className="apply-patch-target">
+                  <div className="item-image-container">
+                    <ItemImage className="m-auto max-w-[512px]" item={targetItem} />
+                  </div>
+                </div>
+                <div className="apply-patch-slots">
+                  {targetItem.allPatches().map(([xslot, patchId]) =>
+                    patchId !== undefined || xslot === slot ? (
+                      <div
+                        key={xslot}
+                        className={`patch-slot ${xslot === slot ? "selected" : ""}`}
+                      >
+                        <ItemImage
+                          className="w-[168px]"
+                          item={
+                            patchId !== undefined
+                              ? CS2Economy.getById(patchId)
+                              : stickerItem
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        key={xslot}
+                        className="patch-slot patch-slot-empty"
+                        onClick={() => {
+                          setSlot(xslot);
+                          playSound("buttonclick");
+                        }}
+                      >
+                        <div className="patch-slot-add">
+                          <FontAwesomeIcon className="h-4" icon={faPlus} />
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+              <div className="apply-patch-footer">
+                <UseItemFooter
+                  right={
+                    <>
+                      <ModalButton
+                        children={translate("ApplyPatchUse")}
+                        disabled={slot === undefined}
+                        onClick={handleApplyPatch}
+                        variant="primary"
+                      />
+                      <ModalButton
+                        children={translate("ApplyStickerCancel")}
+                        onClick={onClose}
+                        variant="secondary"
+                      />
+                    </>
+                  }
+                />
+              </div>
             </div>
-            <UseItemFooter
-              right={
-                <>
-                  <ModalButton
-                    children={translate("ApplyPatchUse")}
-                    disabled={slot === undefined}
-                    onClick={handleApplyPatch}
-                    variant="primary"
-                  />
-                  <ModalButton
-                    children={translate("ApplyStickerCancel")}
-                    onClick={onClose}
-                    variant="secondary"
-                  />
-                </>
-              }
-            />
-          </Overlay>,
+          </div>,
           document.body
         )
       }
